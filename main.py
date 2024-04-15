@@ -3,7 +3,7 @@ from datetime import datetime
 import discord
 import random
 import settings
-from flask import Flask, render_template
+from flask import Flask
 from threading import Thread
 
 app = Flask(__name__)
@@ -79,7 +79,8 @@ def run():
     async def dice(ctx):
         number = random.randint(1, 6)
         await ctx.send(str(number))
-        log_file(f"{ctx.message.author.id} a lancé le dé et il a donné {number}", ctx)
+        log_file(f"{ctx.message.author.id} a lancé le dé et il a donné {
+                 number}", ctx)
 
     @bot.command(
         aliases=["additionner"],
@@ -134,11 +135,11 @@ def run():
     )
     async def modnick(ctx, who: discord.Member, reset=False):
         if reset == False:
-            log_file(f"Nom de {who.name} changé", ctx)
+            log_file(f"Nom de {who.name} modéré.", ctx)
             await who.edit(nick=f"Nom modéré {random.randint(100000, 999999)}")
             await ctx.send(f"Nom de {who.mention} changé avec succès!")
         else:
-            log_file(f"Nom de {who.name} réinitialisé", ctx)
+            log_file(f"Nom de {who.name} réinitialisé.", ctx)
             await who.edit(nick=None)
             await ctx.send(f"Nom de {who.mention} réinitialisé avec succès!")
 
