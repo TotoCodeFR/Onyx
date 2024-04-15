@@ -1,9 +1,9 @@
-from discord.ext import commands # type: ignore
+from discord.ext import commands  # type: ignore
 from datetime import datetime
-import discord # type: ignore
+import discord  # type: ignore
 import random
 import settings
-from flask import Flask # type: ignore
+from flask import Flask  # type: ignore
 from threading import Thread
 from getpass import getpass
 
@@ -30,22 +30,19 @@ def run():
         print("="*50)
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="les utilisateurs :3 !"))
         app = Flask(__name__)
-        
+
         @app.route('/')
         def index():
             return '''<body style="margin: 0; padding: 0;">
             <iframe width="100%" height="100%" src="https://totocodefr.github.io/" frameborder="0" allowfullscreen></iframe>
         </body>'''
 
-
         def run():
             app.run(host='0.0.0.0', port=8080)
-
 
         def keep_alive():
             t = Thread(target=run)
             t.start()
-
 
         keep_alive()
 
@@ -129,7 +126,8 @@ def run():
                 log_file(f"{who.name} a été banni", ctx)
             else:
                 await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-                log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
+                log_file(
+                    f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
 
     @bot.command(
         aliases=["mn"],
@@ -147,9 +145,9 @@ def run():
                     log_file(f"Nom de {who.name} réinitialisé.", ctx)
                     await who.edit(nick=None)
                     await ctx.send(f"Nom de {who.mention} réinitialisé avec succès!")
-            else:
-                await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-                log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
+                break
+            await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
+            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
 
     @bot.command(
         aliases=["logging"],
@@ -165,7 +163,8 @@ def run():
                 await ctx.send(f'```Ajout de "{content}" dans logs/actions.log fait avec succès!```')
             else:
                 await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-                log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !log sans permission.", ctx)
+                log_file(
+                    f"{ctx.message.author.id} a essayé d'utiliser la commande !log sans permission.", ctx)
 
     @bot.command(
         aliases=["sl"],
@@ -194,7 +193,8 @@ def run():
                                 num += 1
             else:
                 await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-                log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !showlog sans permission.", ctx)
+                log_file(
+                    f"{ctx.message.author.id} a essayé d'utiliser la commande !showlog sans permission.", ctx)
 
     bot.run(settings.DISCORD_API_SECRET, root_logger=True)
 
