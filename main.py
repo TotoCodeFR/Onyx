@@ -146,8 +146,8 @@ def run():
                     await who.edit(nick=None)
                     await ctx.send(f"Nom de {who.mention} réinitialisé avec succès!")
                 break
-            await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
+        await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
+        log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
 
     @bot.command(
         aliases=["logging"],
