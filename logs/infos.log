@@ -1,25 +1,2 @@
-INFO       - 2024-04-15 15:07:59,686 - client          : logging in using static token
-INFO       - 2024-04-15 15:08:00,512 - gateway         : Shard ID None has connected to Gateway (Session ID: 810c2d012c858701961960bdaf17d17a).
-ERROR      - 2024-04-15 15:12:25,846 - bot             : Ignoring exception in command modnick
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.12/site-packages/discord/ext/commands/bot.py", line 1350, in invoke
-    await ctx.command.invoke(ctx)
-  File "/usr/local/lib/python3.12/site-packages/discord/ext/commands/core.py", line 1021, in invoke
-    await self.prepare(ctx)
-  File "/usr/local/lib/python3.12/site-packages/discord/ext/commands/core.py", line 938, in prepare
-    await self._parse_arguments(ctx)
-  File "/usr/local/lib/python3.12/site-packages/discord/ext/commands/core.py", line 845, in _parse_arguments
-    transformed = await self.transform(ctx, param, attachments)
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/site-packages/discord/ext/commands/core.py", line 715, in transform
-    return await run_converters(ctx, converter, argument, param)  # type: ignore
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/site-packages/discord/ext/commands/converter.py", line 1355, in run_converters
-    return await _actual_conversion(ctx, converter, argument, param)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/site-packages/discord/ext/commands/converter.py", line 1222, in _actual_conversion
-    return _convert_to_bool(argument)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/site-packages/discord/ext/commands/converter.py", line 1185, in _convert_to_bool
-    raise BadBoolArgument(lowered)
-discord.ext.commands.errors.BadBoolArgument: reset is not a recognised boolean option
+INFO       - 2024-04-15 15:27:59,818 - client          : logging in using static token
+INFO       - 2024-04-15 15:28:00,602 - gateway         : Shard ID None has connected to Gateway (Session ID: 1a5a78ee06bb5b058e855da75ddf4fbf).

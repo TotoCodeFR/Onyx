@@ -9,6 +9,7 @@ from getpass import getpass
 
 logger = settings.logging.getLogger("bot")
 
+done = False
 
 def run():
     intents = discord.Intents.default()
@@ -119,15 +120,17 @@ def run():
         enable=True
     )
     async def ban(ctx, who: discord.Member, reason: str):
+        done = False
         for id_ in settings.owner_ids:
-            if ctx.message.author.id != id_:
+            if ctx.message.author.id == id_:
+                done = True
                 await who.ban(reason=reason)
                 await ctx.send(f"{who.name} a été banni.")
                 log_file(f"{who.name} a été banni", ctx)
-            else:
-                await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-                log_file(
-                    f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
+                break
+        if done == False:
+            await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
+            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
 
     @bot.command(
         aliases=["mn"],
@@ -135,8 +138,10 @@ def run():
         enable=True
     )
     async def modnick(ctx, who: discord.Member, reset=False):
+        done = False
         for id_ in settings.owner_ids:
-            if ctx.message.author.id != id_:
+            if ctx.message.author.id == id_:
+                done = True
                 if reset == False:
                     log_file(f"Nom de {who.name} modéré.", ctx)
                     await who.edit(nick=f"Nom modéré {random.randint(100000, 999999)}")
@@ -146,8 +151,9 @@ def run():
                     await who.edit(nick=None)
                     await ctx.send(f"Nom de {who.mention} réinitialisé avec succès!")
                 break
-        await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-        log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
+        if done == False:
+            await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
+            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
 
     @bot.command(
         aliases=["logging"],
@@ -156,15 +162,16 @@ def run():
         hidden=True
     )
     async def log(ctx, *content):
+        done = False
         for id_ in settings.owner_ids:
-            if ctx.message.author.id != id_:
+            if ctx.message.author.id == id_:
+                done = True
                 content = " ".join(content)
                 log_file(f"(De {ctx.author.id}) : {content}", ctx)
                 await ctx.send(f'```Ajout de "{content}" dans logs/actions.log fait avec succès!```')
-            else:
-                await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-                log_file(
-                    f"{ctx.message.author.id} a essayé d'utiliser la commande !log sans permission.", ctx)
+        if done == False:
+            await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
+            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !log sans permission.", ctx)
 
     @bot.command(
         aliases=["sl"],
@@ -173,8 +180,10 @@ def run():
         hidden=True
     )
     async def showlog(ctx, limit="25"):
+        done = False
         for id_ in settings.owner_ids:
-            if ctx.message.author.id != id_:
+            if ctx.message.author.id == id_:
+                done = True
                 if limit == "a":
                     await ctx.send(f"```Voici le contenu entier de logs/actions.log```")
                     with open("logs/actions.log") as f:
@@ -191,7 +200,7 @@ def run():
                             else:
                                 await ctx.send(f"`{line}`")
                                 num += 1
-            else:
+            if done == False:
                 await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
                 log_file(
                     f"{ctx.message.author.id} a essayé d'utiliser la commande !showlog sans permission.", ctx)
