@@ -17,7 +17,7 @@ def index():
 
 
 def run():
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=5500)
 
 
 def keep_alive():
@@ -41,7 +41,7 @@ def run():
         now = datetime.now()
         time = now.strftime("%d/%m/%Y, %H:%M:%S")
         f.write(
-            f"({ctx.guild.id}, {ctx.message.channel.id} @ {time})" + content + "\n")
+            f"({ctx.guild.id}, {ctx.message.channel.id} @ {time}) : " + content + "\n")
         f.close()
 
     @bot.event
@@ -59,7 +59,7 @@ def run():
     )
     async def ping(ctx):
         await ctx.send("pong")
-        log_file(f"({ctx.guild.id}) : {a}", ctx)
+        log_file(f"({ctx.guild.id}) ", ctx)
 
     @bot.command(
         aliases=["s"],
@@ -79,8 +79,7 @@ def run():
     async def dice(ctx):
         number = random.randint(1, 6)
         await ctx.send(str(number))
-        log_file(f"{ctx.message.author.id} a lancé le dé et il a donné {
-                 number}", ctx)
+        log_file(f"{ctx.message.author.id} a lancé le dé et il a donné {number}", ctx)
 
     @bot.command(
         aliases=["additionner"],
@@ -156,7 +155,7 @@ def run():
 
     @bot.command(
         aliases=["sl"],
-        help='Donne l\'entierté du fichier logs/actions.log.',
+        help='Donne une partie où l\'entierté du fichier logs/actions.log.',
         enable=True,
         hidden=True
     )
