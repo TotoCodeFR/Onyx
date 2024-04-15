@@ -1,23 +1,185 @@
-import discord
 from discord.ext import commands
+from datetime import datetime
+import discord
+import random
+import settings
+from flask import Flask, render_template
+from threading import Thread
 
-intents = discord.Intents.default()
-intents.messages = True  # For receiving messages
-intents.guilds = True    # For server-specific commands
-
-bot = commands.Bot(command_prefix='!', intents=intents)
-
-
-@bot.event
-async def on_ready():
-    print(f'Logged in as {bot.user.name} (ID: {bot.user.id})')
-    print('------')
-
-@bot.event
-async def on_message(message):
-    if bot.user.mentioned_in(message):
-        await message.channel.send('Hello! I am a bot of The God Empire, bestowed with intents!')
-    await bot.process_commands(message)
+app = Flask(__name__)
 
 
-bot.run('your_token_here')
+@app.route('/')
+def index():
+    return '''<body style="margin: 0; padding: 0;">
+    <iframe width="100%" height="100%" src="https://totocodefr.github.io/" frameborder="0" allowfullscreen></iframe>
+  </body>'''
+
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+
+keep_alive()
+
+logger = settings.logging.getLogger("bot")
+
+
+def run():
+    intents = discord.Intents.default()
+    intents.message_content = True
+
+    bot = commands.Bot(command_prefix="!", intents=intents)
+
+    def log_file(content, ctx):
+        f = open("logs/actions.log", "a")
+        now = datetime.now()
+        time = now.strftime("%d/%m/%Y, %H:%M:%S")
+        f.write(
+            f"({ctx.guild.id}, {ctx.message.channel.id} @ {time})" + content + "\n")
+        f.close()
+
+    @bot.event
+    async def on_ready():
+        logger.info(f"User: {bot.user} (ID: {bot.user.id})")
+        print("="*50)
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="les utilisateurs :3 !"))
+
+    @bot.command(
+        aliases=["p"],
+        help="Pong!",
+        description="Ping?",
+        brief="Pong!",
+        enable=True
+    )
+    async def ping(ctx):
+        await ctx.send("pong")
+        log_file(f"({ctx.guild.id}) : {a}", ctx)
+
+    @bot.command(
+        aliases=["s"],
+        help="Dire ce que tu veux",
+        enable=True
+    )
+    async def say(ctx, *a):
+        await ctx.send(" ".join(a))
+        a = " ".join(a)
+        log_file(f"{ctx.message.author.id} a fait dire {a}", ctx)
+
+    @bot.command(
+        aliases=["roll"],
+        help="Donner un chiffre entre 1 et 6",
+        enable=True
+    )
+    async def dice(ctx):
+        number = random.randint(1, 6)
+        await ctx.send(str(number))
+        log_file(f"{ctx.message.author.id} a lancé le dé et il a donné {
+                 number}", ctx)
+
+    @bot.command(
+        aliases=["additionner"],
+        help="Additionner 2 nombres",
+        enable=True
+    )
+    async def add(ctx, a, b):
+        await ctx.send(int(a) + int(b))
+        log_file(f"{ctx.message.author.id} a additionné {a} et {b}", ctx)
+
+    @bot.command(
+        aliases=["soustraire"],
+        help="Soustraire 2 nombres",
+        enable=True
+    )
+    async def sou(ctx, a, b):
+        await ctx.send(int(a) - int(b))
+        log_file(f"{ctx.message.author.id} a soustrait {a} et {b}", ctx)
+
+    @bot.command(
+        aliases=["multiplier"],
+        help="Multiplier 2 nombres",
+        enable=True
+    )
+    async def mul(ctx, a, b):
+        await ctx.send(int(a) * int(b))
+        log_file(f"{ctx.message.author.id} a multiplié {a} et {b}", ctx)
+
+    @bot.command(
+        aliases=["diviser"],
+        help="Diviser 2 nombres",
+        enable=True
+    )
+    async def div(ctx, a, b):
+        await ctx.send(int(a) / int(b))
+        log_file(f"{ctx.message.author.id} a divisé {a} et {b}", ctx)
+
+    @bot.command(
+        aliases=["bannir"],
+        help="Bannir une personne pour une raison",
+        enable=True
+    )
+    async def ban(ctx, who: discord.Member, reason: str):
+        await who.ban(reason=reason)
+        await ctx.send(f"{who.name} a été banni.")
+        log_file(f"{who.name} a été banni", ctx)
+
+    @bot.command(
+        aliases=["mn"],
+        help='Changer le nom de l\'utilisateur par "Nom modéré [6 chiffres aléatoires]".',
+        enable=True
+    )
+    async def modnick(ctx, who: discord.Member, reset=False):
+        if reset == False:
+            log_file(f"Nom de {who.name} changé", ctx)
+            await who.edit(nick=f"Nom modéré {random.randint(100000, 999999)}")
+            await ctx.send(f"Nom de {who.mention} changé avec succès!")
+        else:
+            log_file(f"Nom de {who.name} réinitialisé", ctx)
+            await who.edit(nick=None)
+            await ctx.send(f"Nom de {who.mention} réinitialisé avec succès!")
+
+    @bot.command(
+        aliases=["logging"],
+        help='Ajouter du texte dans logs/actions.log',
+        enable=True,
+        hidden=True
+    )
+    async def log(ctx, *content):
+        content = " ".join(content)
+        log_file(f"(De {ctx.author.id}) : {content}", ctx)
+        await ctx.send(f'```Ajout de "{content}" dans logs/actions.log fait avec succès!```')
+
+    @bot.command(
+        aliases=["sl"],
+        help='Donne l\'entierté du fichier logs/actions.log.',
+        enable=True,
+        hidden=True
+    )
+    async def showlog(ctx, limit="25"):
+        if limit == "a":
+            await ctx.send(f"```Voici le contenu entier de logs/actions.log```")
+            with open("logs/actions.log") as f:
+                for line in f.readlines():
+                    await ctx.send(f"`{line}`")
+        else:
+            await ctx.send(f"```Voici les {limit} dernières lignes de logs/actions.log```")
+            num = 0
+            limit = int(limit)
+            with open("logs/actions.log") as f:
+                for line in f.readlines():
+                    if num == limit:
+                        break
+                    else:
+                        await ctx.send(f"`{line}`")
+                        num += 1
+
+    bot.run(settings.DISCORD_API_SECRET, root_logger=True)
+
+
+if __name__ == "__main__":
+    run()
