@@ -52,3 +52,12 @@ LOGGING_CONFIG = {
 }
 
 dictConfig(LOGGING_CONFIG)
+
+owner_ids = [
+    817758821312495627, # TotoCodeFR
+    1127973768648728676, # Azunne
+    1127973768648728676, # revali
+    970205634295377971 # ItsToto
+]
+
+PASSWORD = os.getenv("PASSWORD")
