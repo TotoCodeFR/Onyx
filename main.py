@@ -6,6 +6,7 @@ import settings
 from flask import Flask  # type: ignore
 from threading import Thread
 from getpass import getpass
+import time
 
 logger = settings.logging.getLogger("bot")
 
@@ -115,11 +116,11 @@ def run():
         log_file(f"{ctx.message.author.id} a divisé {a} et {b}", ctx)
 
     @bot.command(
-        aliases=["bannir"],
+        aliases=["ban"],
         help="Bannir une personne pour une raison",
         enable=True
     )
-    async def ban(ctx, who: discord.Member, reason: str):
+    async def bannir(ctx, who: discord.Member, reason: str):
         done = False
         for id_ in settings.owner_ids:
             if ctx.message.author.id == id_:
@@ -130,7 +131,51 @@ def run():
                 break
         if done == False:
             await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
-            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
+            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !ban sans permission.", ctx)
+    
+    @bot.command(
+        aliases=["kick"],
+        help="Bannir une personne pour une raison",
+        enable=True
+    )
+    async def expulser(ctx, who: discord.Member, reason: str):
+        done = False
+        for id_ in settings.owner_ids:
+            if ctx.message.author.id == id_:
+                done = True
+                await who.kick(reason=reason)
+                await ctx.send(f"{who.name} a été expulsé.")
+                log_file(f"{who.name} a été expulsé", ctx)
+                break
+        if done == False:
+            await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
+            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !kick sans permission.", ctx)
+    
+    @bot.command(
+        aliases=["sm"],
+        help="Bannir une personne pour une raison",
+        enable=True
+    )
+    async def slowmode(ctx, time: int = 0):
+        done = False
+        for id_ in settings.owner_ids:
+            if ctx.message.author.id == id_:
+                done = True
+                if time == 0:
+                    await ctx.message.channel.edit(slowmode_delay=time)
+                    await ctx.send("Temps lent désactivé avec succès!")
+                    log_file(f"{ctx.message.author.id} a désactivé le slowmode.", ctx)
+                elif time >= 21600:
+                    await ctx.send("Le temps lent ne peut pas être plus haut que 6 heures (21600 secondes)!")
+                    log_file(f"{ctx.message.author.id} a essayé de changer le slowmode, mais l'a mit à {time} (>21600 secondes/6 heures).", ctx)
+                else:
+                    await ctx.message.channel.edit(slowmode_delay=time)
+                    await ctx.send(f"Temps lent mis à {time}.")
+                    log_file(f"{ctx.message.author.id} a mit le temps lent à {time}.", ctx)
+                break
+        if done == False:
+            await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
+            log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !slowmode sans permission.", ctx)
 
     @bot.command(
         aliases=["mn"],
@@ -154,13 +199,30 @@ def run():
         if done == False:
             await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
             log_file(f"{ctx.message.author.id} a essayé d'utiliser la commande !modnick sans permission.", ctx)
-
+    
+    @bot.command(
+        brief='Supprime des messages du salon.')
+    async def purge(ctx, amount: int):
+        deleted = await ctx.channel.purge(limit=amount)
+        if len(deleted) == 0:
+            await ctx.send("Aucun message n'a été supprimé. Ca peut être car les messages que vous avez essayés de supprimer sont trop vieux (14 jours sont la limite de Discord).")
+            log_file(f"{ctx.message.author.id} a essayé de supprimer {len(deleted)} message(s), mais n'a pas réussi peut être à cause de la date d'envoi du/des message(s).", ctx)
+        else:
+            if len(deleted) == 1:
+                await ctx.send(f"{len(deleted)} message supprimé avec succès. Si il n'a pas été supprimé, ça veut dire qu'il est trop vieux pour Discord (limite: 14 jours).")
+                log_file(f"{ctx.message.author.id} a supprimé {len(deleted)} message.", ctx)
+            else:
+                await ctx.send(f"{len(deleted)} messages ont été supprimés. Si des messages n'ont pas été supprimés, ça veut dire qu'ils sont trop vieux pour Discord (limite: 14 jours).")
+                log_file(f"{ctx.message.author.id} a supprimé {len(deleted)} message.", ctx)
+    
+    # Log commands
     @bot.command(
         aliases=["logging"],
         help='Ajouter du texte dans logs/actions.log',
         enable=True,
         hidden=True
     )
+    
     async def log(ctx, *content):
         done = False
         for id_ in settings.owner_ids:
@@ -191,15 +253,12 @@ def run():
                             await ctx.send(f"`{line}`")
                 else:
                     await ctx.send(f"```Voici les {limit} dernières lignes de logs/actions.log```")
-                    num = 0
                     limit = int(limit)
                     with open("logs/actions.log") as f:
-                        for line in f.readlines():
-                            if num == limit:
-                                break
-                            else:
+                        last_lines = f.readlines()[-limit:]
+                        for line in last_lines:
+                            if line != "":
                                 await ctx.send(f"`{line}`")
-                                num += 1
             if done == False:
                 await ctx.send("Vous n'avez pas la permission d'utiliser cette commande!")
                 log_file(
